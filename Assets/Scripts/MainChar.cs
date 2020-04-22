@@ -21,20 +21,18 @@ public class MainChar : MonoBehaviour
         movement = new Vector2(speed.x * inputX, obj.velocity.y);
     }
 
-    void OnTriggerEnter2D(Collider2D collider)
-    {
-        if (collider = GameObject.FindWithTag("ground").GetComponent<Collider2D>())
-        {
-            isgrounded = true;
-        } 
-    }
-
     void FixedUpdate()
     {
         GetComponent<Rigidbody2D>().velocity = movement;
         if (Input.GetKeyDown(KeyCode.UpArrow) && isgrounded)
         {
-            obj.AddForce(jump, ForceMode2D.Impulse);
+            bool grounded = (Physics2D.Raycast(obj.transform.position, Vector3.down, 1f, LayerMask.NameToLayer("ground"))); // raycast down to look for ground is not detecting ground? only works if allowing jump when grounded = false; // return "Ground" layer as layer
+            Debug.DrawRay((new Vector3(obj.transform.position.x, obj.transform.position.y + 1f, obj.transform.position.z)), Vector3.down, Color.green, 5);
+            if (grounded == true)
+            {
+                print("grounded!");
+                obj.AddForce(jump, ForceMode2D.Impulse);
+            }
         }
     }
 }
