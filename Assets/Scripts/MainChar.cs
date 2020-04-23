@@ -9,7 +9,7 @@ public class MainChar : MonoBehaviour
     private Vector2 movement;
     public bool isgrounded = false;
     public Vector2 jump = new Vector2(0, 10);
-    public Vector2 powerOfShot = new Vector2(10, 5);
+    public Vector2 powerOfShot = new Vector2(10, 2);
     public GameObject shot;
     void Start()
     {
