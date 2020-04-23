@@ -7,9 +7,10 @@ public class MainChar : MonoBehaviour
     Rigidbody2D obj;
     public Vector2 speed = new Vector2(10, 0);
     private Vector2 movement;
-    private bool isgrounded;
+    public bool isgrounded;
     public Vector2 jump = new Vector2(0, 10);
-
+    public Vector2 powerOfShot = new Vector2(10, 10);
+    public GameObject shot;
     void Start()
     {
         obj = GetComponent<Rigidbody2D>();
@@ -19,21 +20,24 @@ public class MainChar : MonoBehaviour
     {
         float inputX = Input.GetAxis("Horizontal");
         movement = new Vector2(speed.x * inputX, obj.velocity.y);
+        //ниже жалкая попытка рэйкаста для определения земли
+        isgrounded = (Physics2D.Raycast(new Vector2(obj.transform.position.x - 0.5f, obj.transform.position.y - 0.5f), Vector2.down, 0.1f)) || (Physics2D.Raycast(new Vector2(obj.transform.position.x + 0.5f, obj.transform.position.y - 0.5f), Vector2.down, 0.1f));
     }
 
     void FixedUpdate()
     {
-        GetComponent<Rigidbody2D>().velocity = movement;
-        if (Input.GetKeyDown(KeyCode.UpArrow) && isgrounded)
+        if (isgrounded == true)
         {
-            bool grounded = (Physics2D.Raycast(obj.transform.position, Vector3.down, 1f, LayerMask.NameToLayer("ground"))); // raycast down to look for ground is not detecting ground? only works if allowing jump when grounded = false; // return "Ground" layer as layer
-            Debug.DrawRay((new Vector3(obj.transform.position.x, obj.transform.position.y + 1f, obj.transform.position.z)), Vector3.down, Color.green, 5);
-            if (grounded == true)
+            GetComponent<Rigidbody2D>().velocity = movement;
+            if (Input.GetKeyDown(KeyCode.UpArrow))
             {
-                print("grounded!");
                 obj.AddForce(jump, ForceMode2D.Impulse);
             }
         }
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            GameObject bullet = Instantiate(shot);
+            bullet.GetComponent<Rigidbody2D>().AddForce(powerOfShot, ForceMode2D.Impulse);
+        }
     }
 }
-
