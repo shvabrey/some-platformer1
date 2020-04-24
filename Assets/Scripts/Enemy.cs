@@ -6,6 +6,7 @@ public class Enemy : MonoBehaviour
 {
     public float EnemyHP = 100;
     public GameObject Player;
+    public float time;
     Rigidbody2D obj;
 
     public void GetHit(float damage)
@@ -20,9 +21,13 @@ public class Enemy : MonoBehaviour
 
     void Update()
     {
-        if(IsPlayerSpotted() && (transform.position.x - Player.transform.position.x) >= 1f)
+        if (IsPlayerSpotted() && (transform.position.x - Player.transform.position.x) >= 1f)
         {
             obj.velocity = new Vector2(-3, obj.velocity.y);
+        }
+        else if (IsPlayerSpotted() && (transform.position.x - Player.transform.position.x) <= -1f)
+        {
+            obj.velocity = new Vector2(3, obj.velocity.y);
         }
         else
         {
@@ -35,14 +40,20 @@ public class Enemy : MonoBehaviour
     }
     bool IsPlayerSpotted()
     {
-        RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.left);
+        RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.left, 5f);
         if (hit.collider != null && hit.collider.gameObject.tag == "Player")
         {
+            time = 2f;
             return true;
         }
         else
         {
-            return false;
+            time -= Time.deltaTime;
+            if (time <=0)
+            {
+                return false;
+            }
+            return true;
         }
     }
 }

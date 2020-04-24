@@ -63,6 +63,7 @@ public class MainChar : MonoBehaviour
             }
             else
             {
+                bullet.GetComponent<Rigidbody2D>().transform.Rotate(0, 180, 0);
                 bullet.GetComponent<Rigidbody2D>().AddForce(-powerOfShot, ForceMode2D.Impulse);
             }
             
@@ -78,6 +79,7 @@ public class MainChar : MonoBehaviour
                 }
                 else
                 {
+                    bullet.GetComponent<Rigidbody2D>().transform.Rotate(0, 180, 0);
                     bullet.GetComponent<Rigidbody2D>().AddForce(new Vector2(Random.Range(-8f, -10f), Random.Range(-1f, 1f)), ForceMode2D.Impulse);
                 }
             }
