@@ -6,54 +6,126 @@ public class Enemy : MonoBehaviour
 {
     public float EnemyHP = 100;
     public GameObject Player;
-    public float time;
+    public float AgrTime;
+    public float AgrDistance = 5f;
     Rigidbody2D obj;
-
-    public void GetHit(float damage)
-    {
-        EnemyHP -= damage;
-    }
+    bool faceRight = false;
 
     void Start()
     {
         obj = GetComponent<Rigidbody2D>();
     }
 
-    void Update()
+    public void GetHit(float damage)
     {
-        if (IsPlayerSpotted() && (transform.position.x - Player.transform.position.x) >= 1f)
+        //смотрим откуда стреляли
+        if (DistanceToPlayer() > 0 && !IsPlayerSpotted() && faceRight == true)
         {
-            obj.velocity = new Vector2(-3, obj.velocity.y);
+            FlipX();
         }
-        else if (IsPlayerSpotted() && (transform.position.x - Player.transform.position.x) <= -1f)
+        else if (DistanceToPlayer() < 0 && !IsPlayerSpotted() && faceRight == false)
         {
-            obj.velocity = new Vector2(3, obj.velocity.y);
+            FlipX();
+        }
+        AgrDistance = 20f;
+        //получение урона
+        EnemyHP -= damage;
+    }
+    private bool Way()
+    {
+        RaycastHit2D hitRight;
+        RaycastHit2D hitLeft;
+        hitRight = Physics2D.Raycast(transform.position, new Vector2(1f, -1f), 1f);
+        hitLeft = Physics2D.Raycast(transform.position, new Vector2(-1f, -1f), 1f);
+        Debug.DrawRay(transform.position, new Vector3(1f, -1f));
+        Debug.DrawRay(transform.position, new Vector3(-1f, -1f));
+        if (faceRight == false && hitLeft.collider != null && hitLeft.collider.gameObject.tag == "ground")
+        {
+            return true;
+        }
+        if (faceRight == true && hitRight.collider != null && hitRight.collider.gameObject.tag == "ground")
+        {
+            return true;
+        }
+        return false;
+    }
+
+    float DistanceToPlayer()
+    {
+        return transform.position.x - Player.transform.position.x;
+    }
+
+    void FlipX()
+    {
+        transform.Rotate(0, 180, 0);
+        faceRight = !faceRight;
+    }
+
+    //ходьба
+    void Go()
+    {
+        obj.velocity = new Vector2(0, obj.velocity.y);
+        if (IsPlayerSpotted() && DistanceToPlayer() >= 1f)
+        {
+            if (faceRight == true)
+            {
+                FlipX();
+            }
+            if (Way())
+            {
+                obj.velocity = new Vector2(-3, obj.velocity.y);
+            }
+        }
+        else if (IsPlayerSpotted() && DistanceToPlayer() <= -1f)
+        {
+            if (faceRight == false)
+            {
+                FlipX();
+            }
+            if (Way())
+            {
+                obj.velocity = new Vector2(3, obj.velocity.y);
+            }
+        }
+    }
+
+    bool IsPlayerSpotted()
+    {
+        RaycastHit2D hit;
+        if (faceRight == false)
+        {
+            hit = Physics2D.Raycast(transform.position, Vector2.left, AgrDistance);
         }
         else
         {
-            obj.velocity = new Vector2(0, obj.velocity.y);
+            hit = Physics2D.Raycast(transform.position, Vector2.right, AgrDistance);
         }
-        if (EnemyHP <= 0)
+        if ((hit.collider != null && hit.collider.gameObject.tag == "Player"))
         {
-            Destroy(gameObject);
-        }
-    }
-    bool IsPlayerSpotted()
-    {
-        RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.left, 5f);
-        if (hit.collider != null && hit.collider.gameObject.tag == "Player")
-        {
-            time = 2f;
+            AgrTime = 5f;
             return true;
         }
         else
         {
-            time -= Time.deltaTime;
-            if (time <=0)
+            AgrTime -= Time.deltaTime;
+            if (AgrTime <= 0 || Mathf.Abs(DistanceToPlayer()) > 10f)
             {
+                AgrDistance = 5f;
                 return false;
             }
             return true;
         }
+    }
+
+    void Update()
+    {
+        Go();
+        //урон
+        if (EnemyHP <= 0)
+        {
+            Destroy(gameObject);
+        }
+        //патрулирование будет здесь
+
     }
 }
