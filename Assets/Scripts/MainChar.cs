@@ -5,22 +5,41 @@ using UnityEngine;
 public class MainChar : MonoBehaviour
 {
     Rigidbody2D obj;
-    public Vector2 speed = new Vector2(10, 0);
+    public Vector2 speed = new Vector2(5, 0);
     private Vector2 movement;
     public bool isgrounded = false;
     public Vector2 jump = new Vector2(0, 10);
     public Vector2 powerOfShot = new Vector2(10, 2);
     public GameObject shot;
     public bool faceRight = true;
+    Animator animator;
+
     void Start()
     {
         obj = GetComponent<Rigidbody2D>();
+        animator = GetComponent<Animator>();
     }
+
 
     void Update()
     {
         float inputX = Input.GetAxis("Horizontal");
         movement = new Vector2(speed.x * inputX, obj.velocity.y);
+
+        if (Mathf.Abs(inputX)>0)
+        {
+            if (animator.GetBool("run") == false)
+            {
+                animator.SetBool("run", true);
+            }
+        }
+        else
+        {
+            if (animator.GetBool("run")==true)
+            {
+                animator.SetBool("run", false);
+            }
+        }
 
 
         if (faceRight == true)
@@ -40,19 +59,24 @@ public class MainChar : MonoBehaviour
             }
         }
 
+        animator.SetBool("jumpS", false);
+        isgrounded = (Physics2D.Raycast(new Vector2(obj.transform.position.x - 0.15f, obj.transform.position.y - 0.5f), Vector2.down, 0.2f)) || (Physics2D.Raycast(new Vector2(obj.transform.position.x + 0.15f, obj.transform.position.y - 0.5f), Vector2.down, 0.2f));
+
+        if (isgrounded == true)
+        {
+            animator.SetBool("jump", false);
+        }
 
         GetComponent<Rigidbody2D>().velocity = movement;
         if ((Input.GetKeyDown(KeyCode.UpArrow)) || (Input.GetKeyDown(KeyCode.W)))
         {
-            //ниже жалкая попытка рэйкаста для определения земли
-            isgrounded = (Physics2D.Raycast(new Vector2(obj.transform.position.x - 0.15f, obj.transform.position.y - 0.5f), Vector2.down, 0.2f)) || (Physics2D.Raycast(new Vector2(obj.transform.position.x + 0.15f, obj.transform.position.y - 0.5f), Vector2.down, 0.2f));
             if (isgrounded == true)
             {
                 obj.AddForce(jump, ForceMode2D.Impulse);
+                animator.SetBool("jump", true);
+                animator.SetBool("jumpS", true);
             }
         }
-
-
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
